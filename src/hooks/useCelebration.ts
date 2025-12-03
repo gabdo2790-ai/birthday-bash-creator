@@ -10,9 +10,10 @@ export const useCelebration = (slug: string | undefined) => {
     queryKey: ["celebration", slug],
     queryFn: async () => {
       if (!slug) return null;
+      // Only select non-sensitive fields - passwords are validated server-side
       const { data, error } = await supabase
         .from("celebrations")
-        .select("*")
+        .select("id, slug, birthday_person_name, main_media_url, main_media_type, created_at, updated_at")
         .eq("slug", slug)
         .maybeSingle();
       if (error) throw error;

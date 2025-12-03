@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useCelebration, useMessages, useDeleteMessage, useUpdateCelebration } from "@/hooks/useCelebration";
+import { useVerifyPassword } from "@/hooks/useVerifyPassword";
 
 const CelebrationAdmin = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -26,6 +27,7 @@ const CelebrationAdmin = () => {
   const { data: messages = [], isLoading: messagesLoading } = useMessages(celebration?.id);
   const deleteMessage = useDeleteMessage();
   const updateCelebration = useUpdateCelebration();
+  const { verifyPassword, isVerifying } = useVerifyPassword();
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
@@ -35,9 +37,12 @@ const CelebrationAdmin = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (celebration && password === celebration.admin_password) {
+    if (!slug) return;
+    
+    const result = await verifyPassword(slug, password, 'admin');
+    if (result.valid) {
       setIsAuthenticated(true);
       setAuthError("");
       toast({
@@ -159,8 +164,8 @@ const CelebrationAdmin = () => {
                   <p className="text-sm text-destructive">{authError}</p>
                 )}
               </div>
-              <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-                Access Admin Panel
+              <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={isVerifying}>
+                {isVerifying ? "Verifying..." : "Access Admin Panel"}
               </Button>
               <button
                 type="button"
