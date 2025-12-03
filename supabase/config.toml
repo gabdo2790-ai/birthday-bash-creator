@@ -2,3 +2,6 @@ project_id = "fxcpkqndmwyniwdyfkym"
 
 [functions.verify-password]
 verify_jwt = false
+
+[functions.delete-message]
+verify_jwt = false
