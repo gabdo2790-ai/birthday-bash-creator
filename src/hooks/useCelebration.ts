@@ -10,9 +10,9 @@ export const useCelebration = (slug: string | undefined) => {
     queryKey: ["celebration", slug],
     queryFn: async () => {
       if (!slug) return null;
-      // Only select non-sensitive fields - passwords are validated server-side
+      // Query the public view which excludes sensitive password fields
       const { data, error } = await supabase
-        .from("celebrations")
+        .from("celebrations_public")
         .select("id, slug, birthday_person_name, main_media_url, main_media_type, created_at, updated_at")
         .eq("slug", slug)
         .maybeSingle();
@@ -46,17 +46,16 @@ export const useCreateCelebration = () => {
   return useMutation({
     mutationFn: async (data: TablesInsert<"celebrations">) => {
       console.log("Creating celebration with data:", data);
-      const { data: result, error } = await supabase
+      // Don't use .select() because RLS blocks SELECT on celebrations table
+      const { error } = await supabase
         .from("celebrations")
-        .insert(data)
-        .select()
-        .single();
+        .insert(data);
       if (error) {
         console.error("Error creating celebration:", error);
         throw error;
       }
-      console.log("Celebration created:", result);
-      return result;
+      console.log("Celebration created successfully");
+      return { slug: data.slug };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["celebration"] });
