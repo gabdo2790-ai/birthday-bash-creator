@@ -86,11 +86,47 @@ export type Database = {
             referencedRelation: "celebrations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "messages_celebration_id_fkey"
+            columns: ["celebration_id"]
+            isOneToOne: false
+            referencedRelation: "celebrations_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      celebrations_public: {
+        Row: {
+          birthday_person_name: string | null
+          created_at: string | null
+          id: string | null
+          main_media_type: string | null
+          main_media_url: string | null
+          slug: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          birthday_person_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          main_media_type?: string | null
+          main_media_url?: string | null
+          slug?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          birthday_person_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          main_media_type?: string | null
+          main_media_url?: string | null
+          slug?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
