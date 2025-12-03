@@ -31,6 +31,7 @@ const CelebrationAdmin = () => {
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
+  const [adminPassword, setAdminPassword] = useState(""); // Store verified admin password
   const [authError, setAuthError] = useState("");
   const [mainMedia, setMainMedia] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState("");
@@ -44,6 +45,7 @@ const CelebrationAdmin = () => {
     const result = await verifyPassword(slug, password, 'admin');
     if (result.valid) {
       setIsAuthenticated(true);
+      setAdminPassword(password); // Store the verified admin password for later use
       setAuthError("");
       toast({
         title: "Welcome Admin! 🎉",
@@ -100,8 +102,9 @@ const CelebrationAdmin = () => {
   };
 
   const handleDeleteMessage = async (id: string) => {
+    if (!slug) return;
     try {
-      await deleteMessage.mutateAsync(id);
+      await deleteMessage.mutateAsync({ messageId: id, slug, adminPassword });
       setDeleteId(null);
       toast({
         title: "Message Deleted",
