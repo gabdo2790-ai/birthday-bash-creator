@@ -68,14 +68,13 @@ export const useUpdateCelebration = () => {
   
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: TablesUpdate<"celebrations"> }) => {
-      const { data: result, error } = await supabase
+      // Don't use .select() because RLS blocks SELECT on celebrations table
+      const { error } = await supabase
         .from("celebrations")
         .update(data)
-        .eq("id", id)
-        .select()
-        .single();
+        .eq("id", id);
       if (error) throw error;
-      return result;
+      return { success: true };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["celebration"] });
