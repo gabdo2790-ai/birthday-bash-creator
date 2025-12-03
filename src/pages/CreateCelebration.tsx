@@ -25,8 +25,10 @@ const CreateCelebration = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Form submitted!", { name, viewPassword, adminPassword });
     
     if (!name.trim() || !viewPassword.trim() || !adminPassword.trim()) {
+      console.log("Validation failed - missing fields");
       toast({
         title: "Missing Information",
         description: "Please fill in all fields",
@@ -36,14 +38,17 @@ const CreateCelebration = () => {
     }
 
     const slug = generateSlug();
+    console.log("Generated slug:", slug);
     
     try {
-      await createCelebration.mutateAsync({
+      console.log("Calling createCelebration.mutateAsync...");
+      const result = await createCelebration.mutateAsync({
         slug,
         birthday_person_name: name.trim(),
         view_password: viewPassword,
         admin_password: adminPassword,
       });
+      console.log("Success! Result:", result);
       
       setCreatedSlug(slug);
       toast({
@@ -51,6 +56,7 @@ const CreateCelebration = () => {
         description: "Your birthday celebration page is ready!",
       });
     } catch (error) {
+      console.error("Error creating celebration:", error);
       toast({
         title: "Error",
         description: "Failed to create celebration. Please try again.",
