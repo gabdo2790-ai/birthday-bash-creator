@@ -1,27 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 
-export interface Celebration {
-  id: string;
-  slug: string;
-  birthday_person_name: string;
-  view_password: string;
-  admin_password: string;
-  main_media_url: string | null;
-  main_media_type: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Message {
-  id: string;
-  celebration_id: string;
-  sender_name: string;
-  message: string;
-  media_url: string | null;
-  media_type: string | null;
-  created_at: string;
-}
+export type Celebration = Tables<"celebrations">;
+export type Message = Tables<"messages">;
 
 export const useCelebration = (slug: string | undefined) => {
   return useQuery({
@@ -34,7 +16,7 @@ export const useCelebration = (slug: string | undefined) => {
         .eq("slug", slug)
         .maybeSingle();
       if (error) throw error;
-      return data as Celebration | null;
+      return data;
     },
     enabled: !!slug,
   });
@@ -51,7 +33,7 @@ export const useMessages = (celebrationId: string | undefined) => {
         .eq("celebration_id", celebrationId)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as Message[];
+      return data || [];
     },
     enabled: !!celebrationId,
   });
@@ -61,19 +43,19 @@ export const useCreateCelebration = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (data: {
-      slug: string;
-      birthday_person_name: string;
-      view_password: string;
-      admin_password: string;
-    }) => {
+    mutationFn: async (data: TablesInsert<"celebrations">) => {
+      console.log("Creating celebration with data:", data);
       const { data: result, error } = await supabase
         .from("celebrations")
         .insert(data)
         .select()
         .single();
-      if (error) throw error;
-      return result as Celebration;
+      if (error) {
+        console.error("Error creating celebration:", error);
+        throw error;
+      }
+      console.log("Celebration created:", result);
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["celebration"] });
@@ -85,7 +67,7 @@ export const useUpdateCelebration = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<Celebration> }) => {
+    mutationFn: async ({ id, data }: { id: string; data: TablesUpdate<"celebrations"> }) => {
       const { data: result, error } = await supabase
         .from("celebrations")
         .update(data)
@@ -93,9 +75,9 @@ export const useUpdateCelebration = () => {
         .select()
         .single();
       if (error) throw error;
-      return result as Celebration;
+      return result;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["celebration"] });
     },
   });
@@ -105,20 +87,14 @@ export const useAddMessage = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (data: {
-      celebration_id: string;
-      sender_name: string;
-      message: string;
-      media_url?: string;
-      media_type?: string;
-    }) => {
+    mutationFn: async (data: TablesInsert<"messages">) => {
       const { data: result, error } = await supabase
         .from("messages")
         .insert(data)
         .select()
         .single();
       if (error) throw error;
-      return result as Message;
+      return result;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["messages", variables.celebration_id] });
