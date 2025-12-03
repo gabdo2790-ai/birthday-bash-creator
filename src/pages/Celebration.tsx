@@ -9,18 +9,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Gift, MessageSquareHeart, Cake, Lock } from "lucide-react";
 import { useCelebration } from "@/hooks/useCelebration";
+import { useVerifyPassword } from "@/hooks/useVerifyPassword";
 
 const Celebration = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { data: celebration, isLoading, error } = useCelebration(slug);
+  const { verifyPassword, isVerifying } = useVerifyPassword();
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authError, setAuthError] = useState("");
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (celebration && password === celebration.view_password) {
+    if (!slug) return;
+    
+    const result = await verifyPassword(slug, password, 'view');
+    if (result.valid) {
       setIsAuthenticated(true);
       setAuthError("");
     } else {
@@ -87,8 +92,8 @@ const Celebration = () => {
                   <p className="text-sm text-destructive">{authError}</p>
                 )}
               </div>
-              <SparkleButton type="submit" className="w-full">
-                View Celebration 🎉
+              <SparkleButton type="submit" className="w-full" disabled={isVerifying}>
+                {isVerifying ? "Verifying..." : "View Celebration 🎉"}
               </SparkleButton>
             </form>
           </CardContent>
