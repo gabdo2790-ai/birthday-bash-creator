@@ -14,7 +14,80 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      celebrations: {
+        Row: {
+          admin_password: string
+          birthday_person_name: string
+          created_at: string
+          id: string
+          main_media_type: string | null
+          main_media_url: string | null
+          slug: string
+          updated_at: string
+          view_password: string
+        }
+        Insert: {
+          admin_password: string
+          birthday_person_name: string
+          created_at?: string
+          id?: string
+          main_media_type?: string | null
+          main_media_url?: string | null
+          slug: string
+          updated_at?: string
+          view_password: string
+        }
+        Update: {
+          admin_password?: string
+          birthday_person_name?: string
+          created_at?: string
+          id?: string
+          main_media_type?: string | null
+          main_media_url?: string | null
+          slug?: string
+          updated_at?: string
+          view_password?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          celebration_id: string
+          created_at: string
+          id: string
+          media_type: string | null
+          media_url: string | null
+          message: string
+          sender_name: string
+        }
+        Insert: {
+          celebration_id: string
+          created_at?: string
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          message: string
+          sender_name: string
+        }
+        Update: {
+          celebration_id?: string
+          created_at?: string
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          message?: string
+          sender_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_celebration_id_fkey"
+            columns: ["celebration_id"]
+            isOneToOne: false
+            referencedRelation: "celebrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
