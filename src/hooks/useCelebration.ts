@@ -107,12 +107,14 @@ export const useDeleteMessage = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("messages")
-        .delete()
-        .eq("id", id);
+    mutationFn: async ({ messageId, slug, adminPassword }: { messageId: string; slug: string; adminPassword: string }) => {
+      const { data, error } = await supabase.functions.invoke('delete-message', {
+        body: { messageId, slug, adminPassword }
+      });
+      
       if (error) throw error;
+      if (!data.success) throw new Error(data.error || 'Failed to delete message');
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["messages"] });
